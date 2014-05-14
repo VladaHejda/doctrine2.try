@@ -97,17 +97,29 @@ if (isset($_POST['create'])) {
 	<p><input type="submit" name="create" value="create"></p>
 </form>
 
+
+
+
 <?php
+
+if (isset($_GET['close'])) {
+	$entityManager->find('Bug', $_GET['close'])->close();
+	$entityManager->flush();
+}
 
 $dql = "SELECT b, e, r FROM Bug b LEFT JOIN b.engineer e JOIN b.reporter r ".
 	"WHERE r.id = ?1 ORDER BY b.created DESC";
 
-$query = $entityManager->createQuery($dql)->setMaxResults(5)->setParameter(1, isset($_GET['id']) ? $_GET['id'] : 1);
+$id = $id = isset($_GET['id']) ? $_GET['id'] : 1;
+$query = $entityManager->createQuery($dql)->setMaxResults(5)->setParameter(1, $id);
 $bugs = $query->getResult();
 
 echo '<table>';
 foreach ($bugs as $bug) {
-	echo '<tr><td>' . $bug->getCreated()->format('d.m.Y')
+	echo '<tr>'
+		. '<td><a href="?id='.$id.'&close='.$bug->getId().'">zavriť</a></td>'
+		. '<td>' . $bug->getCreated()->format('d.m.Y') . '</td>'
+		. '<td>' . $bug->getStatus() . '</td>'
 		. '<td>' . $bug->getDescription() . '</td>'
 		. '<td>' . $bug->getReporter()->getName() . '</td>'
 		. '<td>' . ($bug->getEngineer() ? $bug->getEngineer()->getName() : '-') . '</td><td>Products:<ul>';
