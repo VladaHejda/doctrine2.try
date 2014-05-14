@@ -1,5 +1,7 @@
 <?php
 
+use Doctrine\Common\Collections\ArrayCollection;
+
 /**
  * @Entity(repositoryClass="BugRepository") @Table(name="bugs")
  */
@@ -25,11 +27,51 @@ class Bug
 	 * @var string
 	 */
 	protected $status;
+	/**
+	 * @ManyToMany(targetEntity="Product")
+	 **/
+	protected $products;
+	/**
+	 * @ManyToOne(targetEntity="User", inversedBy="assignedBugs")
+	 **/
+	protected $engineer;
+	/**
+	 * @ManyToOne(targetEntity="User", inversedBy="reportedBugs")
+	 **/
+	protected $reporter;
+
+	public function __construct()
+	{
+		$this->products = new ArrayCollection();
+	}
 
 	public function getId()
 	{
 		return $this->id;
 	}
+
+	public function setEngineer(User $engineer)
+	{
+		$engineer->assignedToBug($this);
+		$this->engineer = $engineer;
+	}
+
+	public function setReporter(User $reporter)
+	{
+		$reporter->addReportedBug($this);
+		$this->reporter = $reporter;
+	}
+
+	public function getEngineer()
+	{
+		return $this->engineer;
+	}
+
+	public function getReporter()
+	{
+		return $this->reporter;
+	}
+
 
 	public function getDescription()
 	{

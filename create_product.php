@@ -1,5 +1,5 @@
 <?php
-// call create_product.php product_name
+// call create_product.php product_name price description
 
 require_once "bootstrap.php";
 
