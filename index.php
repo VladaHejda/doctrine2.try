@@ -152,3 +152,12 @@ echo '</table>';
 $dql = "SELECT count(b.id) FROM Bug b";
 $count = $entityManager->createQuery($dql)->getSingleScalarResult();
 echo "<h2>Count of bugs: $count</h2>";
+
+
+
+echo "<h2>Closed bugs:</h2>";
+echo '<ul>';
+foreach ($entityManager->getRepository('Bug')->getClosed() as $bug) {
+	echo '<li>' . $bug->getDescription() . '</li>';
+}
+echo '</ul>';
