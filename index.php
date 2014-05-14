@@ -56,6 +56,21 @@ if (isset($_GET['id'])) {
 
 
 
+if (isset($_GET['name'])) {
+	$name = $_GET['name'];
+	echo "<h2>Product $name:</h2>";
+	$product = $entityManager->getRepository('Product')->findOneBy(['name' => $name]);
+
+	if (!$product) {
+		echo '<p>no product</p>';
+	} else {
+		echo "<p>name: " . $product->getName() . " , price: " . $product->getDescription() . "</p>";
+	}
+}
+
+
+
+
 if (isset($_POST['create'])) {
 	function createBug($entityManager){
 		$description = $_POST['description'];
