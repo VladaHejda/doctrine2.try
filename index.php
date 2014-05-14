@@ -47,7 +47,7 @@ if (isset($_GET['id'])) {
 	}
 	?>
 <form method="post">
-	<input name="name" value="<?=$product->getName(); ?>">
+	<input name="name" value="<?=$product ? $product->getName() : ''; ?>">
 	<input type="submit" value="change">
 </form>
 	<?php
@@ -72,14 +72,19 @@ if (isset($_POST['create'])) {
 		$bug->setReporter($reporter);
 		$bug->setStatus('OPEN');
 
-		foreach ($productsIds as $productsId) {
-			$product = $entityManager->find('Product', $productsId);
+		foreach ($productsIds as $productId) {
+			$productId = trim($productId);
+			$product = $entityManager->find('Product', $productId);
 			if (!$product) {
-				echo "<p>neexistujcí produktus $productsId</p>";
+				echo "<p>neexistujcí produktus $productId</p>";
 				return;
 			}
 			$bug->assignToProduct($product);
 		}
+
+		$entityManager->persist($bug);
+		$entityManager->flush();
+		echo "<p>Byl kreatovanej bugís '$description'</p>";
 	}
 	createBug($entityManager);
 }
@@ -89,5 +94,34 @@ if (isset($_POST['create'])) {
 	<p>Popís buga: <input name="description" value="<?php echo isset($_POST['description']) ? $_POST['description'] : ''; ?>" size="50"></p>
 	<p>ÍDé tvojo: <input name="reporterId" value="<?php echo isset($_POST['reporterId']) ? $_POST['reporterId'] : ''; ?>"></p>
 	<p>ÍDéčka produktóv, na kterejch ty bugy sou, vodděl čarou: <input name="productsIds" value="<?php echo isset($_POST['productsIds']) ? $_POST['productsIds'] : ''; ?>" size="50"></p>
-	<p><input type="submit" value="create"></p>
+	<p><input type="submit" name="create" value="create"></p>
 </form>
+
+<?php
+
+$dql = "SELECT b, e, r FROM Bug b LEFT JOIN b.engineer e JOIN b.reporter r ".
+	"WHERE r.id = ?1 ORDER BY b.created DESC";
+
+$query = $entityManager->createQuery($dql)->setMaxResults(5)->setParameter(1, isset($_GET['id']) ? $_GET['id'] : 1);
+$bugs = $query->getResult();
+
+echo '<table>';
+foreach ($bugs as $bug) {
+	echo '<tr><td>' . $bug->getCreated()->format('d.m.Y')
+		. '<td>' . $bug->getDescription() . '</td>'
+		. '<td>' . $bug->getReporter()->getName() . '</td>'
+		. '<td>' . ($bug->getEngineer() ? $bug->getEngineer()->getName() : '-') . '</td><td>Products:<ul>';
+	foreach ($bug->getProducts() as $product) {
+		echo '<li>' . $product->getName(). "</li>";
+	}
+	echo '</ul></tr>';
+}
+echo '</table>';
+
+
+
+
+
+$dql = "SELECT count(b.id) FROM Bug b";
+$count = $entityManager->createQuery($dql)->getSingleScalarResult();
+echo "<h2>Count of bugs: $count</h2>";

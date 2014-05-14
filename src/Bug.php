@@ -40,6 +40,7 @@ class Bug
 	 **/
 	protected $reporter;
 
+
 	public function __construct()
 	{
 		$this->products = new ArrayCollection();
@@ -48,6 +49,16 @@ class Bug
 	public function getId()
 	{
 		return $this->id;
+	}
+
+	public function assignToProduct($product)
+	{
+		$this->products[] = $product;
+	}
+
+	public function getProducts()
+	{
+		return $this->products;
 	}
 
 	public function setEngineer(User $engineer)
